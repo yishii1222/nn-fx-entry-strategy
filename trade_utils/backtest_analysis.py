@@ -99,6 +99,11 @@ def analyze_trades(trades, results, entry_times, holding_times, sim_start, end_d
     buy_loss_dist  = Counter(buy_loss_streaks)
     sell_loss_dist = Counter(sell_loss_streaks)
 
+    # 決着なし（ラベル付けされなかったトレード）の統計
+    no_decision = sum(1 for r in results if r['profit'] is None and r['signal'] in ['BUY','SELL'])
+    total_signals = sum(1 for r in results if r['signal'] in ['BUY','SELL'])
+    no_decision_rate = (no_decision / total_signals * 100) if total_signals > 0 else 0
+
     return {
         'num_trades': num_trades,
         'wins': wins,
@@ -123,4 +128,6 @@ def analyze_trades(trades, results, entry_times, holding_times, sim_start, end_d
         'sell_signal_dist': sell_signal_dist,
         'buy_loss_dist': buy_loss_dist,
         'sell_loss_dist': sell_loss_dist,
+        'no_decision_count': no_decision,
+        'no_decision_rate': no_decision_rate,
     }

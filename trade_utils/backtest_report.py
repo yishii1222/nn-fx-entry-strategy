@@ -28,6 +28,8 @@ def generate_backtest_report(metrics, trades):
     print(f"シグナルSELL(分布) : {metrics['sell_signal_dist']}")
     print(f"買い連敗ストリーク(分布): {metrics['buy_loss_dist']}")
     print(f"売り連敗ストリーク(分布): {metrics['sell_loss_dist']}")
+    print(f"決着なしトレード数    : {metrics.get('no_decision_count', 0)}")
+    print(f"決着なし割合         : {metrics.get('no_decision_rate', 0):.2f}%")
 
     # 成長曲線グラフ保存
     plt.figure()

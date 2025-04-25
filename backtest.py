@@ -4,7 +4,7 @@ from trade_utils.backtest_analysis import analyze_trades
 from trade_utils.backtest_report import generate_backtest_report
 
 # シミュレーション対象期間（日本時間JST指定）
-START_DATE   = '2025-04-01T00:00:00'
+START_DATE   = '2025-04-21T00:00:00'
 END_DATE     = '2025-04-24T23:59:59'
 
 def main():

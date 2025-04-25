@@ -6,11 +6,12 @@ from datetime import timedelta, timezone
 TP_PIPS             = 10               # Before : 5
 SL_PIPS             = 10               # Before : 3
 DAYS_BACK           = 10               # Before : 5
-K_RATIO             = 0.10             # Before : 0.01
+K_RATIO             = 0.10
 DIST_MEAN_THRESH    = 1.0
 DIST_MAX_THRESH     = 2.0
 EPSILON             = 1e-6
 SIGNIFICANCE_LEVEL  = 0.05
+LABEL_MAX_MINUTES   = 60               # Before : 30
 
 # ====== 固定設定値 ======
 SPREAD_PIPS         = 0.2
