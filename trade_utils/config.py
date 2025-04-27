@@ -11,7 +11,7 @@ DIST_MEAN_THRESH    = 1.0
 DIST_MAX_THRESH     = 2.0
 EPSILON             = 1e-6
 SIGNIFICANCE_LEVEL  = 0.05
-LABEL_MAX_MINUTES   = 90               # Before : 60 ※ 要検討 未解決
+LABEL_MAX_MINUTES   = 90               # Before : 60 -> 90 ※ 要検討 未解決
 
 # ====== 固定設定値 ======
 SPREAD_PIPS         = 0.2

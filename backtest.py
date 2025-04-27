@@ -5,7 +5,7 @@ from trade_utils.backtest_report import generate_backtest_report
 
 # シミュレーション対象期間（日本時間JST指定）
 START_DATE   = '2025-04-21T00:00:00'
-END_DATE     = '2025-04-24T23:59:59'
+END_DATE     = '2025-04-25T23:59:59'
 
 def main():
     df_all, sim_start, end_dt = load_backtest_data(START_DATE, END_DATE)
