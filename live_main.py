@@ -7,8 +7,36 @@ from trade_utils.data_fetch import fetch_1min_data
 from trade_utils.features import compute_features_and_labels
 from trade_utils.signals import estimate_signals, explain_reason
 
+# 通知機能のインポート
+try:
+    import win10toast
+    toaster = win10toast.ToastNotifier()
+except ImportError:
+    win10toast = None
+    toaster = None
+
+try:
+    import winsound
+except ImportError:
+    winsound = None
+
+# ビープ関数定義
+def beep():
+    if winsound:
+        winsound.Beep(1000, 500)
+    else:
+        print('\a')
+
+# 通知送信
+def send_notification(title, message):
+    if toaster:
+        toaster.show_toast(title, message, duration=5)
+    else:
+        print(f"NOTIFICATION: {title} - {message}")
+
 # ====== 実行モード設定 ======
 LOOP_MODE = True
+
 
 def execute_analysis():
     # データ取得
@@ -53,16 +81,24 @@ def execute_analysis():
     # エントリー判定
     if buy_ok and not sell_ok:
         print("→ 戦略：BUY 推奨")
+        send_notification("FX シグナル", "BUY 推奨")
+        beep()
     elif sell_ok and not buy_ok:
         print("→ 戦略：SELL 推奨")
+        send_notification("FX シグナル", "SELL 推奨")
+        beep()
     elif buy_ok and sell_ok:
-        print("→ 戦略：BUY 推奨" if metrics['buy_rate'] > metrics['sell_rate'] else "→ 戦略：SELL 推奨")
+        strategy = "BUY 推奨" if metrics['buy_rate'] > metrics['sell_rate'] else "SELL 推奨"
+        print(f"→ 戦略：{strategy}")
+        send_notification("FX シグナル", strategy)
+        beep()
     else:
         print("→ 戦略：様子見")
 
     # 判定理由表示
-    explain_reason(buy_ok, "buy", metrics, "BUY")
-    explain_reason(sell_ok, "sell", metrics, "SELL")
+    explain_reason(buy_ok, "buy", metrics)
+    explain_reason(sell_ok, "sell", metrics)
+
 
 if LOOP_MODE:
     while True:

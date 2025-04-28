@@ -117,7 +117,7 @@ def estimate_signals(train_df: pd.DataFrame, latest_row: pd.Series) -> tuple:
     return buy_ok, sell_ok, metrics
 
 
-def explain_reason(ok_flag, label, metrics, prefix):
+def explain_reason(ok_flag, label, metrics):
     reasons = []
     if not ok_flag:
         if metrics.get(f"{label}_rate", 0) < metrics.get('threshold', 0):

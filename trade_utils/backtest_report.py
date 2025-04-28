@@ -18,7 +18,7 @@ def generate_backtest_report(metrics, trades):
     print(f"平均待機分数        : {metrics['avg_wait']:.2f}")
     print(f"中央値待機分数      : {metrics['median_wait']:.2f}")
     print(f"待機時間標準偏差    : {metrics['std_wait']:.2f}")
-    print(f"平均保有分数        : {metrics['median_hold']:.2f}")
+    print(f"保有分数中央値      : {metrics['median_hold']:.2f}")
     print(f"保有時間標準偏差    : {metrics['std_hold']:.2f}")
     print(f"平均保有分数 (勝利)   : {metrics['avg_hold_win']:.2f}")
     print(f"平均保有分数 (敗北)   : {metrics['avg_hold_loss']:.2f}")
