@@ -1,5 +1,7 @@
 import os
 import json
+import warnings
+import numpy as np
 import pandas as pd
 from pandas.tseries.offsets import BDay
 from datetime import datetime, timezone
@@ -12,7 +14,7 @@ from scipy.stats import pointbiserialr
 # ====== 閾値設定 ======
 CORR_THRESHOLD = 0.8
 VIF_THRESHOLD  = 10.0
-PVAL_THRESHOLD = 0.10  # ターゲット相関検定の p 値閾値
+PVAL_THRESHOLD = 0.30  # ターゲット相関検定の p 値閾値
 
 # ====== ホールドアウト設定 ======
 HOLDOUT_RANGE_DAYS = 60   # 特徴選択用期間（営業日数）
@@ -21,10 +23,16 @@ MAX_BACKTEST_DAYS  = 22   # バックテストが参照しうる最大期間（�
 
 def calculate_vif(df: pd.DataFrame) -> pd.Series:
     """
-    DataFrame の各特徴量について VIF (分散膨張係数) を計算する
+    DataFrame の各特徴量について VIF (分散膨張係数) を計算する。
+    divide-by-zero 警告を抑止し、∞ を NaN へ置換して扱いやすくする。
     """
-    vif_values = [variance_inflation_factor(df.values, i) for i in range(df.shape[1])]
-    return pd.Series(vif_values, index=df.columns)
+    with warnings.catch_warnings():
+        # divide by zero (R^2=1) を黙殺
+        warnings.filterwarnings("ignore", category=RuntimeWarning)
+        vif_values = [variance_inflation_factor(df.values, i) for i in range(df.shape[1])]
+    # 無限大や -∞ を NaN に置換し、後段で除外判定を容易に
+    vif_series = pd.Series(vif_values, index=df.columns).replace([np.inf, -np.inf], np.nan)
+    return vif_series
 
 
 def main():
@@ -40,7 +48,7 @@ def main():
         print("データ取得失敗または不足")
         return
 
-    # === 変更点: 全候補特徴量を自動取得 ===========================
+    # === 全候補特徴量を自動取得 ===========================
     feat_cols = list_available_features()
     df = compute_features_and_labels(df, selected_features=feat_cols)
 
@@ -51,7 +59,7 @@ def main():
     corr = feat_df.corr()
     corr.to_csv(os.path.join(out_dir, "feature_correlation.csv"))
 
-    # VIF 計算
+    # VIF 計算 (警告抑止 & ∞ → NaN 済み)
     vif = calculate_vif(feat_df)
     vif.to_csv(os.path.join(out_dir, "feature_vif.csv"), header=False)
 
@@ -60,9 +68,16 @@ def main():
     for i, f1 in enumerate(feat_cols):
         for f2 in feat_cols[i + 1:]:
             if abs(corr.loc[f1, f2]) > CORR_THRESHOLD:
-                drop_set.add(f1 if vif[f1] >= vif[f2] else f2)
+                # より VIF が大きいほうを落とす (NaN は最大扱い)
+                v1, v2 = vif.get(f1, np.nan), vif.get(f2, np.nan)
+                if pd.isna(v1):
+                    drop_set.add(f1)
+                elif pd.isna(v2):
+                    drop_set.add(f2)
+                else:
+                    drop_set.add(f1 if v1 >= v2 else f2)
     for f in feat_cols:
-        if vif[f] > VIF_THRESHOLD:
+        if pd.isna(vif[f]) or vif[f] > VIF_THRESHOLD:
             drop_set.add(f)
 
     # ターゲット相関検定
@@ -85,7 +100,7 @@ def main():
     print("=== 選択された特徴量 ===")
     print(sorted(selected))
 
-    # 選択リスト保存
+    # 選択リスト保存 (CSV → 役割重複のため廃止: JSON のみに集約)
     with open(FEATURE_CONF_PATH, "w", encoding="utf-8") as f_json:
         json.dump(selected, f_json, ensure_ascii=False, indent=2)
 

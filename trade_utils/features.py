@@ -1,12 +1,23 @@
 import numpy as np
 import pandas as pd
-from ta.trend import ADXIndicator, AroonIndicator
-from ta.momentum import RSIIndicator
-from ta.volatility import AverageTrueRange
+from ta.trend import (
+    ADXIndicator, AroonIndicator, EMAIndicator, SMAIndicator, MACD,
+    CCIIndicator                       # ★ 追加: CCI 用
+)
+from ta.momentum import (
+    RSIIndicator, StochasticOscillator, ROCIndicator, WilliamsRIndicator
+)
+from ta.volatility import (
+    AverageTrueRange, BollingerBands, KeltnerChannel
+)
+from ta.volume import (
+    MFIIndicator, ChaikinMoneyFlowIndicator
+)
 from .config import TP_PIPS, SL_PIPS, SPREAD_PIPS, LABEL_MAX_MINUTES, load_selected_features
 
 # ===== 追加: 計算可能な全候補特徴量リスト =============================
 _ALL_FEATURES = [
+    # 既存 -----------------------------
     'rsi', 'rsi_trend',
     'adx',
     'atr', 'atr_change',
@@ -14,6 +25,29 @@ _ALL_FEATURES = [
     'aroon_up', 'aroon_down',
     'price_pos', 'range',
     'vol_roc5', 'vol_roc10',
+    # 新規: 移動平均距離 ---------------
+    'dist_to_sma_5', 'dist_to_sma_20', 'dist_to_sma_40',
+    'dist_to_sma_240', 'dist_to_sma_1000',
+    'dist_to_ema_5', 'dist_to_ema_20', 'dist_to_ema_40',
+    'dist_to_ema_240', 'dist_to_ema_1000',
+    # 新規: ボリンジャーバンド ---------
+    'bb_upper', 'bb_lower', 'bb_width', 'bb_percent',
+    # 新規: ケルトナーチャンネル -------
+    'kc_upper', 'kc_lower', 'kc_width', 'kc_percent',
+    # 新規: MACD -----------------------
+    'macd', 'macd_signal', 'macd_hist',
+    # 新規: ストキャスティクス ----------
+    'stoch_k', 'stoch_d',
+    # 新規: CCI / Williams %R ----------
+    'cci', 'willr',
+    # 新規: MFI / CMF ------------------
+    'mfi', 'cmf',
+    # 新規: ROC / モメンタム ------------
+    'roc_1', 'roc_5', 'momentum_5',
+    # 新規: リターン --------------------
+    'ret_1', 'ret_5',
+    # 新規: 高低差比率 ------------------
+    'hl_ratio'
 ]
 
 def list_available_features() -> list:
@@ -79,6 +113,104 @@ def compute_features_and_labels(df: pd.DataFrame, selected_features: list | None
         df["vol_roc5"]  = df["volume"].pct_change(5)
     if "vol_roc10" in selected_features:
         df["vol_roc10"] = df["volume"].pct_change(10)
+
+    # ======== ここから新規特徴量群 =================================
+
+    # --- 移動平均距離 (SMA/EMA) ----------------------------------
+    sma_map = {
+        5: "dist_to_sma_5", 20: "dist_to_sma_20",
+        40: "dist_to_sma_40", 240: "dist_to_sma_240",
+        1000: "dist_to_sma_1000"
+    }
+    if any(name in selected_features for name in sma_map.values()):
+        for w, cname in sma_map.items():
+            if cname in selected_features:
+                sma = SMAIndicator(close=df["close"], window=w).sma_indicator()
+                df[cname] = (df["close"] - sma) / sma
+
+    ema_map = {
+        5: "dist_to_ema_5", 20: "dist_to_ema_20",
+        40: "dist_to_ema_40", 240: "dist_to_ema_240",
+        1000: "dist_to_ema_1000"
+    }
+    if any(name in selected_features for name in ema_map.values()):
+        for w, cname in ema_map.items():
+            if cname in selected_features:
+                ema = EMAIndicator(close=df["close"], window=w).ema_indicator()
+                df[cname] = (df["close"] - ema) / ema
+
+    # --- ボリンジャーバンド -------------------------------------
+    if any(f in selected_features for f in ["bb_upper", "bb_lower", "bb_width", "bb_percent"]):
+        bb = BollingerBands(close=df["close"], window=20, window_dev=2)
+        if "bb_upper" in selected_features:
+            df["bb_upper"] = bb.bollinger_hband()
+        if "bb_lower" in selected_features:
+            df["bb_lower"] = bb.bollinger_lband()
+        if "bb_width" in selected_features:
+            df["bb_width"] = bb.bollinger_wband()
+        if "bb_percent" in selected_features:
+            df["bb_percent"] = bb.bollinger_pband()
+
+    # --- ケルトナーチャンネル -----------------------------------
+    if any(f in selected_features for f in ["kc_upper", "kc_lower", "kc_width", "kc_percent"]):
+        kc = KeltnerChannel(high=df["high"], low=df["low"], close=df["close"], window=20)
+        if "kc_upper" in selected_features:
+            df["kc_upper"] = kc.keltner_channel_hband()
+        if "kc_lower" in selected_features:
+            df["kc_lower"] = kc.keltner_channel_lband()
+        if "kc_width" in selected_features:
+            df["kc_width"] = kc.keltner_channel_wband()
+        if "kc_percent" in selected_features:
+            df["kc_percent"] = kc.keltner_channel_pband()
+
+    # --- MACD ----------------------------------------------------
+    if any(f in selected_features for f in ["macd", "macd_signal", "macd_hist"]):
+        macd_ind = MACD(close=df["close"], window_slow=26, window_fast=12, window_sign=9)
+        if "macd" in selected_features:
+            df["macd"] = macd_ind.macd()
+        if "macd_signal" in selected_features:
+            df["macd_signal"] = macd_ind.macd_signal()
+        if "macd_hist" in selected_features:
+            df["macd_hist"] = macd_ind.macd_diff()
+
+    # --- ストキャスティクス --------------------------------------
+    if any(f in selected_features for f in ["stoch_k", "stoch_d"]):
+        stoch = StochasticOscillator(high=df["high"], low=df["low"], close=df["close"], window=14, smooth_window=3)
+        if "stoch_k" in selected_features:
+            df["stoch_k"] = stoch.stoch()
+        if "stoch_d" in selected_features:
+            df["stoch_d"] = stoch.stoch_signal()
+
+    # --- CCI / Williams %R --------------------------------------
+    if "cci" in selected_features:
+        df["cci"] = CCIIndicator(high=df["high"], low=df["low"], close=df["close"], window=20).cci()
+    if "willr" in selected_features:
+        df["willr"] = WilliamsRIndicator(high=df["high"], low=df["low"], close=df["close"], lbp=14).williams_r()
+
+    # --- MFI / CMF ----------------------------------------------
+    if "mfi" in selected_features:
+        df["mfi"] = MFIIndicator(high=df["high"], low=df["low"], close=df["close"], volume=df["volume"], window=14).money_flow_index()
+    if "cmf" in selected_features:
+        df["cmf"] = ChaikinMoneyFlowIndicator(high=df["high"], low=df["low"], close=df["close"], volume=df["volume"], window=20).chaikin_money_flow()
+
+    # --- ROC / モメンタム ---------------------------------------
+    if any(f in selected_features for f in ["roc_1", "roc_5"]):
+        if "roc_1" in selected_features:
+            df["roc_1"] = ROCIndicator(close=df["close"], window=1).roc()
+        if "roc_5" in selected_features:
+            df["roc_5"] = ROCIndicator(close=df["close"], window=5).roc()
+    if "momentum_5" in selected_features:
+        df["momentum_5"] = df["close"].diff(5)
+
+    # --- リターン -----------------------------------------------
+    if "ret_1" in selected_features:
+        df["ret_1"] = df["close"].pct_change(1)
+    if "ret_5" in selected_features:
+        df["ret_5"] = df["close"].pct_change(5)
+
+    # --- 高低差比率 ---------------------------------------------
+    if "hl_ratio" in selected_features:
+        df["hl_ratio"] = (df["high"] - df["low"]) / df["close"]
 
     # ===== ラベル付け（既存ロジック） =============================
     n = len(df)
