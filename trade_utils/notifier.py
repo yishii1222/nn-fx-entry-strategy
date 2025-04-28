@@ -5,10 +5,24 @@ except ImportError:
 
 def beep():
     if winsound:
-        winsound.Beep(1000, 500)
+        try:
+            # Windows のシステム通知音を再生
+            winsound.PlaySound('SystemAsterisk', winsound.SND_ALIAS)
+        except Exception:
+            try:
+                # フォールバックでメッセージビープ
+                winsound.MessageBeep(winsound.MB_ICONASTERISK)
+            except Exception:
+                # 最終フォールバックで周波数指定ビープ
+                winsound.Beep(1000, 500)
     else:
         import ctypes
-        ctypes.windll.kernel32.Beep(1000, 500)
+        try:
+            # ユーザ32のメッセージビープ
+            ctypes.windll.user32.MessageBeep(0xFFFFFFFF)
+        except Exception:
+            # カーネル32のビープ
+            ctypes.windll.kernel32.Beep(1000, 500)
 
 try:
     import win10toast
