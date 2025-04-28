@@ -19,8 +19,6 @@ ACCESS_TOKEN        = '0277ce3e38b48230acfb6ed493c43a70-c4952ef6136325c9f5c713d1
 INSTRUMENT          = 'USD_JPY'
 JST                 = timezone(timedelta(hours=9))
 THRESH_PATH         = "optuna_config.json"
-
-# === NEW === 選択特徴量保存先
 FEATURE_CONF_PATH   = "selected_features.json"
 
 # Optuna時に設定値取得
@@ -32,7 +30,7 @@ def load_thresholds_from_file():
             DIST_MEAN_THRESH = config.get("mean_thresh", DIST_MEAN_THRESH)
             DIST_MAX_THRESH  = config.get("max_thresh", DIST_MAX_THRESH)
 
-# === NEW === 選択特徴量読み込み
+# 選択特徴量読み込み
 def load_selected_features():
     """
     JSON から選択特徴量リストを読み込む。

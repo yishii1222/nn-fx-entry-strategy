@@ -1,10 +1,10 @@
 [
-  "rsi_trend",
-  "adx",
   "obv",
-  "aroon_up",
-  "aroon_down",
-  "price_pos",
+  "adx",
+  "cmf",
   "mfi",
-  "cmf"
+  "aroon_down",
+  "rsi_trend",
+  "aroon_up",
+  "price_pos"
 ]
