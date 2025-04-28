@@ -5,23 +5,19 @@ except ImportError:
 
 def beep():
     if winsound:
+        # まずは確実に鳴るMessageBeepを最初に再生
         try:
-            # Windows のシステム通知音を再生
-            winsound.PlaySound('SystemAsterisk', winsound.SND_ALIAS)
+            winsound.MessageBeep(winsound.MB_ICONASTERISK)
         except Exception:
             try:
-                # フォールバックでメッセージビープ
-                winsound.MessageBeep(winsound.MB_ICONASTERISK)
-            except Exception:
-                # 最終フォールバックで周波数指定ビープ
                 winsound.Beep(1000, 500)
+            except Exception:
+                pass
     else:
         import ctypes
         try:
-            # ユーザ32のメッセージビープ
             ctypes.windll.user32.MessageBeep(0xFFFFFFFF)
         except Exception:
-            # カーネル32のビープ
             ctypes.windll.kernel32.Beep(1000, 500)
 
 try:
@@ -45,10 +41,8 @@ except ImportError:
 def send_notification(title: str, message: str):
     if toaster:
         try:
-            # 非同期実行のまま、patched on_destroy でエラー回避
             toaster.show_toast(title, message, duration=5, threaded=True)
         except Exception as e:
-            # 何らかの例外は標準出力にフォールバック
             print(f"NOTIFICATION ERROR: {e}")
             print(f"NOTIFICATION: {title} - {message}")
     else:
