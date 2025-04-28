@@ -11,6 +11,17 @@ def main():
     df_all, sim_start, end_dt = load_backtest_data(START_DATE, END_DATE)
     if df_all.empty:
         return
+
+    # === 追加: 使用した特徴量を表示 ===
+    runtime_feats = [
+        c for c in df_all.columns
+        if c not in [
+            "open", "high", "low", "close", "volume",
+            "label_buy", "label_sell", "time_buy", "time_sell"
+        ]
+    ]
+    print("使用特徴量        :", ", ".join(sorted(runtime_feats)))
+
     trades, results, entry_times, holding_times = simulate_trades(df_all, sim_start, end_dt)
     metrics = analyze_trades(trades, results, entry_times, holding_times, sim_start, end_dt)
     metrics['start_date'] = START_DATE
