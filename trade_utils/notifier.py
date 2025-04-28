@@ -19,9 +19,13 @@ except ImportError:
 def send_notification(title: str, message: str):
     if toaster:
         try:
+            # threaded=True がデフォルトなので非同期でポップアップを表示
             toaster.show_toast(title, message, duration=5)
+        except TypeError:
+            # WndProc が None を返す問題を無視
+            pass
         except Exception as e:
-            # 通知エラー時は標準出力にフォールバック
+            # その他のエラーは標準出力にフォールバック
             print(f"NOTIFICATION ERROR: {e}")
             print(f"NOTIFICATION: {title} - {message}")
     else:
