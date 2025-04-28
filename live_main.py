@@ -18,6 +18,7 @@ def execute_analysis():
     # 実営業日ベースで過去 DAYS_BACK 日分を取得
     start = pd.to_datetime(now) - BDay(DAYS_BACK)
     df = fetch_1min_data(start, pd.to_datetime(now), ACCESS_TOKEN, INSTRUMENT)
+
     if df.empty or len(df) < 50:
         print("データ取得失敗または不足")
         return
