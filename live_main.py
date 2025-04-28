@@ -26,6 +26,15 @@ def execute_analysis():
     # 特徴量計算＋ラベル付け
     df = compute_features_and_labels(df)
 
+    # 実際に DataFrame に残っている特徴量列を抽出
+    runtime_feats = [
+        c for c in df.columns
+        if c not in [
+            "open", "high", "low", "close", "volume",
+            "label_buy", "label_sell", "time_buy", "time_sell"
+        ]
+    ]
+
     # 共通ロジックで判定
     buy_ok, sell_ok, metrics = estimate_signals(df, df.iloc[-1])
 
@@ -36,6 +45,8 @@ def execute_analysis():
     print("分析足確定時刻 :", lt_time.strftime("%Y-%m-%d %H:%M:%S"), "JST")
     print("実行完了時刻   ：", now_exec.strftime("%Y-%m-%d %H:%M:%S"), "JST")
     print("-" * 60)
+    # ★ 追加: 実際に学習・推論で使われた特徴量を出力
+    print("使用特徴量        :", ", ".join(sorted(runtime_feats)))
 
     # サンプル不足時のメッセージ
     if not metrics:
