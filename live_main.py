@@ -6,39 +6,7 @@ from trade_utils.config import ACCESS_TOKEN, INSTRUMENT, DAYS_BACK, JST
 from trade_utils.data_fetch import fetch_1min_data
 from trade_utils.features import compute_features_and_labels
 from trade_utils.signals import estimate_signals, explain_reason
-
-# 通知機能のインポート
-try:
-    import win10toast
-    toaster = win10toast.ToastNotifier()
-except ImportError:
-    win10toast = None
-    toaster = None
-
-# ビープ機能定義: Windows API を直接呼び出して確実に音を鳴らす
-try:
-    import winsound
-    def beep():
-        winsound.Beep(1000, 500)
-except ImportError:
-    import ctypes
-    def beep():
-        # 周波数1000Hz、持続500ms
-        ctypes.windll.kernel32.Beep(1000, 500)
-
-# 通知送信
-def beep():
-    if winsound:
-        winsound.Beep(1000, 500)
-    else:
-        print('\a')
-
-# 通知送信
-def send_notification(title, message):
-    if toaster:
-        toaster.show_toast(title, message, duration=5)
-    else:
-        print(f"NOTIFICATION: {title} - {message}")
+from trade_utils.notifier import send_notification, beep
 
 # ====== 実行モード設定 ======
 LOOP_MODE = True
@@ -46,10 +14,10 @@ LOOP_MODE = True
 
 def execute_analysis():
     # データ取得
-    now   = datetime.now(timezone.utc)
+    now = datetime.now(timezone.utc)
     # 実営業日ベースで過去 DAYS_BACK 日分を取得
     start = pd.to_datetime(now) - BDay(DAYS_BACK)
-    df    = fetch_1min_data(start, pd.to_datetime(now), ACCESS_TOKEN, INSTRUMENT)
+    df = fetch_1min_data(start, pd.to_datetime(now), ACCESS_TOKEN, INSTRUMENT)
     if df.empty or len(df) < 50:
         print("データ取得失敗または不足")
         return
@@ -62,11 +30,11 @@ def execute_analysis():
 
     # ヘッダー表示（メトリクスなしでも出力）
     now_exec = datetime.now(timezone.utc).astimezone(JST)
-    lt_time  = df.index[-1].astimezone(JST)
-    print("="*30 + " 現在の局面分析 " + "="*30)
+    lt_time = df.index[-1].astimezone(JST)
+    print("=" * 30 + " 現在の局面分析 " + "=" * 30)
     print("分析足確定時刻 :", lt_time.strftime("%Y-%m-%d %H:%M:%S"), "JST")
     print("実行完了時刻   ：", now_exec.strftime("%Y-%m-%d %H:%M:%S"), "JST")
-    print("-"*60)
+    print("-" * 60)
 
     # サンプル不足時のメッセージ
     if not metrics:
@@ -110,7 +78,7 @@ if LOOP_MODE:
     while True:
         loop_start = datetime.now(timezone.utc)
         execute_analysis()
-        next_run  = (loop_start + timedelta(minutes=1)).replace(second=0, microsecond=0)
+        next_run = (loop_start + timedelta(minutes=1)).replace(second=0, microsecond=0)
         sleep_sec = (next_run - datetime.now(timezone.utc)).total_seconds()
         if sleep_sec > 0:
             time.sleep(sleep_sec)
