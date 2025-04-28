@@ -3,9 +3,9 @@ import json
 from datetime import timedelta, timezone
 
 # ====== 可変設定値 ======
-TP_PIPS             = 10               # Before : 5
-SL_PIPS             = 10               # Before : 3
-DAYS_BACK           = 10               # Before : 5
+TP_PIPS             = 10
+SL_PIPS             = 10
+DAYS_BACK           = 20               # Before : 10
 K_RATIO             = 0.10
 DIST_MEAN_THRESH    = 1.0
 DIST_MAX_THRESH     = 2.0

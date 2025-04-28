@@ -3,7 +3,6 @@ import pandas as pd
 from datetime import timedelta
 from dateutil import parser
 import requests
-from .config import ACCESS_TOKEN, INSTRUMENT
 
 
 def fetch_1min_data(start: pd.Timestamp, end: pd.Timestamp, access_token: str, instrument: str) -> pd.DataFrame:
