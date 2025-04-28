@@ -15,12 +15,18 @@ except ImportError:
     win10toast = None
     toaster = None
 
+# ビープ機能定義: Windows API を直接呼び出して確実に音を鳴らす
 try:
     import winsound
+    def beep():
+        winsound.Beep(1000, 500)
 except ImportError:
-    winsound = None
+    import ctypes
+    def beep():
+        # 周波数1000Hz、持続500ms
+        ctypes.windll.kernel32.Beep(1000, 500)
 
-# ビープ関数定義
+# 通知送信
 def beep():
     if winsound:
         winsound.Beep(1000, 500)
