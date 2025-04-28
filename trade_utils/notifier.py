@@ -5,7 +5,6 @@ except ImportError:
 
 def beep():
     if winsound:
-        # まずは確実に鳴るMessageBeepを最初に再生
         try:
             winsound.MessageBeep(winsound.MB_ICONASTERISK)
         except Exception:
@@ -26,7 +25,6 @@ try:
 
     class PatchedToastNotifier(ToastNotifier):
         def on_destroy(self, hwnd, msg, wparam, lparam):
-            # base の通知終了処理を行いつつ、整数を返す
             try:
                 super().on_destroy(hwnd, msg, wparam, lparam)
             except Exception:

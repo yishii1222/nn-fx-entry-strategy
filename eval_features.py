@@ -27,10 +27,8 @@ def calculate_vif(df: pd.DataFrame) -> pd.Series:
     divide-by-zero 警告を抑止し、∞ を NaN へ置換して扱いやすくする。
     """
     with warnings.catch_warnings():
-        # divide by zero (R^2=1) を黙殺
         warnings.filterwarnings("ignore", category=RuntimeWarning)
         vif_values = [variance_inflation_factor(df.values, i) for i in range(df.shape[1])]
-    # 無限大や -∞ を NaN に置換し、後段で除外判定を容易に
     vif_series = pd.Series(vif_values, index=df.columns).replace([np.inf, -np.inf], np.nan)
     return vif_series
 
@@ -39,7 +37,6 @@ def main():
     out_dir = "eval_features"
     os.makedirs(out_dir, exist_ok=True)
 
-    # データ取得範囲設定
     now = pd.to_datetime(datetime.now(timezone.utc))
     holdout_end   = now - BDay(DAYS_BACK + MAX_BACKTEST_DAYS)
     holdout_start = holdout_end - BDay(HOLDOUT_RANGE_DAYS)
@@ -48,27 +45,20 @@ def main():
         print("データ取得失敗または不足")
         return
 
-    # === 全候補特徴量を自動取得 ===========================
     feat_cols = list_available_features()
     df = compute_features_and_labels(df, selected_features=feat_cols)
-
-    # 欠損を除外
     feat_df = df[feat_cols].dropna()
 
-    # 相関行列出力
     corr = feat_df.corr()
     corr.to_csv(os.path.join(out_dir, "feature_correlation.csv"))
 
-    # VIF 計算 (警告抑止 & ∞ → NaN 済み)
     vif = calculate_vif(feat_df)
     vif.to_csv(os.path.join(out_dir, "feature_vif.csv"), header=False)
 
-    # 除外候補セット生成
     drop_set = set()
     for i, f1 in enumerate(feat_cols):
         for f2 in feat_cols[i + 1:]:
             if abs(corr.loc[f1, f2]) > CORR_THRESHOLD:
-                # より VIF が大きいほうを落とす (NaN は最大扱い)
                 v1, v2 = vif.get(f1, np.nan), vif.get(f2, np.nan)
                 if pd.isna(v1):
                     drop_set.add(f1)
@@ -80,7 +70,6 @@ def main():
         if pd.isna(vif[f]) or vif[f] > VIF_THRESHOLD:
             drop_set.add(f)
 
-    # ターゲット相関検定
     df_target = feat_df.copy()
     df_target['label'] = df['label_buy'].reindex(feat_df.index)
     df_target = df_target.dropna(subset=['label'])
@@ -91,7 +80,6 @@ def main():
             target_drop.add(f)
     drop_set |= target_drop
 
-    # 結果表示
     print("=== 除外された特徴量 ===")
     print(sorted(drop_set))
     print("=== ターゲット相関検定で除外された特徴量 ===")
@@ -100,7 +88,6 @@ def main():
     print("=== 選択された特徴量 ===")
     print(sorted(selected))
 
-    # 選択リスト保存 (CSV → 役割重複のため廃止: JSON のみに集約)
     with open(FEATURE_CONF_PATH, "w", encoding="utf-8") as f_json:
         json.dump(selected, f_json, ensure_ascii=False, indent=2)
 

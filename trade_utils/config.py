@@ -21,16 +21,6 @@ JST                 = timezone(timedelta(hours=9))
 THRESH_PATH         = "optuna_config.json"
 FEATURE_CONF_PATH   = "selected_features.json"
 
-# Optuna時に設定値取得
-def load_thresholds_from_file():
-    global DIST_MEAN_THRESH, DIST_MAX_THRESH
-    if os.path.exists(THRESH_PATH):
-        with open(THRESH_PATH, "r") as f:
-            config = json.load(f)
-            DIST_MEAN_THRESH = config.get("mean_thresh", DIST_MEAN_THRESH)
-            DIST_MAX_THRESH  = config.get("max_thresh", DIST_MAX_THRESH)
-
-# 選択特徴量読み込み
 def load_selected_features():
     """
     JSON から選択特徴量リストを読み込む。

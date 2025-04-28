@@ -2,14 +2,11 @@ import os
 import pandas as pd
 from datetime import timezone as _timezone
 from pandas.tseries.offsets import BDay
-from trade_utils.config import ACCESS_TOKEN, INSTRUMENT, DAYS_BACK, JST, load_thresholds_from_file
+from trade_utils.config import ACCESS_TOKEN, INSTRUMENT, DAYS_BACK, JST
 from trade_utils.data_fetch import fetch_1min_data
 from trade_utils.features import compute_features_and_labels
 
 def load_backtest_data(start_date: str, end_date: str) -> tuple:
-    # Optuna実行時のみ設定ファイル読み込み
-    if os.environ.get("OPTUNA_RUN") == "1":
-        load_thresholds_from_file()
 
     # 日本時間(JST)をUTCに変換
     end_dt    = pd.to_datetime(end_date).tz_localize(JST).tz_convert(_timezone.utc)
