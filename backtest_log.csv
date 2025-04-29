@@ -1,3 +1,6 @@
 run_at,start_date,end_date,days_back,label_max_minutes,features,win_rate,wins,num_trades,net_profit,pf,avg_return,no_decision_rate
 2025-04-29 00:20:15,2025-04-21T00:00:00,2025-04-25T23:59:59,20,90,adx;aroon_down;aroon_up;cmf;mfi;obv;price_pos;rsi_trend,60.08,152,253,459.4000000000003,1.45,1.82,0.00
 2025-04-29 09:28:33,2025-04-21T00:00:00,2025-04-25T23:59:59,20,90,adx;atr_change;bb_percent;cmf;dist_to_sma_20;dist_to_sma_240;momentum_5;obv;rsi_trend;vol_roc5,60.14,166,276,504.8000000000002,1.45,1.83,0.00
+2025-04-29 10:01:37,2025-04-21T00:00:00,2025-04-25T23:59:59,20,90,adx;atr_change;bb_percent;cmf;dist_to_sma_20;dist_to_sma_240;momentum_5;obv;rsi_trend;vol_roc5,48.67,110,226,-105.19999999999982,0.91,-0.47,0.00
+2025-04-29 10:52:21,2025-04-21T00:00:00,2025-04-25T23:59:59,20,90,adx;aroon_down;aroon_up;cmf;mfi;obv;price_pos;rsi_trend,51.26,102,199,10.200000000000045,1.01,0.05,0.00
+2025-04-29 11:06:20,2025-04-21T00:00:00,2025-04-25T23:59:59,20,60,adx;atr_change;bb_percent;cmf;dist_to_sma_20;dist_to_sma_240;momentum_5;obv;rsi_trend;vol_roc5,49.55,111,224,-64.79999999999973,0.94,-0.29,0.00

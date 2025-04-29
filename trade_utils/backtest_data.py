@@ -1,4 +1,3 @@
-import os
 import pandas as pd
 from datetime import timezone as _timezone
 from pandas.tseries.offsets import BDay

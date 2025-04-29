@@ -35,6 +35,18 @@ def simulate_trades(df_all: pd.DataFrame, sim_start, end_dt):
         train_start = current_time - BDay(DAYS_BACK)
         train_end = current_time - timedelta(minutes=1)
         train_df = df_all.loc[train_start:train_end]
+
+        # ======== データリーク防止 ==================================
+        if not train_df.empty:
+            elapsed_min = (current_time - train_df.index).total_seconds() / 60
+            elapsed_min = pd.Series(elapsed_min, index=train_df.index)
+            # まだ「未来」に相当するラベルは無効化
+            leak_b = train_df['time_buy']  > elapsed_min
+            leak_s = train_df['time_sell'] > elapsed_min
+            train_df.loc[leak_b, 'label_buy']  = pd.NA
+            train_df.loc[leak_s, 'label_sell'] = pd.NA
+        # ==========================================================
+
         if len(train_df) < 50:
             results.append({'time': current_time, 'signal': 'NONE', 'profit': None})
             continue

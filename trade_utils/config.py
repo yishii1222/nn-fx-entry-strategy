@@ -11,14 +11,13 @@ DIST_MEAN_THRESH    = 1.0
 DIST_MAX_THRESH     = 2.0
 EPSILON             = 1e-6
 SIGNIFICANCE_LEVEL  = 0.05
-LABEL_MAX_MINUTES   = 90               # Before : 60 -> 90 ※ 要検討 未解決
+LABEL_MAX_MINUTES   = 60               # Before : 90
 
 # ====== 固定設定値 ======
 SPREAD_PIPS         = 0.2
 ACCESS_TOKEN        = '0277ce3e38b48230acfb6ed493c43a70-c4952ef6136325c9f5c713d1d218fdaa'
 INSTRUMENT          = 'USD_JPY'
 JST                 = timezone(timedelta(hours=9))
-THRESH_PATH         = "optuna_config.json"
 FEATURE_CONF_PATH   = "selected_features.json"
 
 def load_selected_features():
