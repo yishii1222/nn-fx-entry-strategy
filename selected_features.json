@@ -1,10 +1,12 @@
 [
-  "obv",
   "adx",
-  "cmf",
-  "mfi",
-  "aroon_down",
+  "dist_to_sma_20",
+  "dist_to_sma_240",
   "rsi_trend",
-  "aroon_up",
-  "price_pos"
+  "momentum_5",
+  "atr_change",
+  "bb_percent",
+  "obv",
+  "vol_roc5",
+  "cmf"
 ]

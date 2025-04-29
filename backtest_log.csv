@@ -1,2 +1,3 @@
 run_at,start_date,end_date,days_back,label_max_minutes,features,win_rate,wins,num_trades,net_profit,pf,avg_return,no_decision_rate
 2025-04-29 00:20:15,2025-04-21T00:00:00,2025-04-25T23:59:59,20,90,adx;aroon_down;aroon_up;cmf;mfi;obv;price_pos;rsi_trend,60.08,152,253,459.4000000000003,1.45,1.82,0.00
+2025-04-29 09:28:33,2025-04-21T00:00:00,2025-04-25T23:59:59,20,90,adx;atr_change;bb_percent;cmf;dist_to_sma_20;dist_to_sma_240;momentum_5;obv;rsi_trend;vol_roc5,60.14,166,276,504.8000000000002,1.45,1.83,0.00
